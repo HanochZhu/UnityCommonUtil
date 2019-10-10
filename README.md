@@ -7,7 +7,7 @@
 
 * others can also join in us.
 
-* You can find me form my blog :https://blog.csdn.net/u011618339
+* You can find me from my blog :https://blog.csdn.net/u011618339
 
 ## Used for ##
 * This library is writen by C#, and used for Unity3d
