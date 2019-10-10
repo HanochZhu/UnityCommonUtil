@@ -1,5 +1,5 @@
 # UnityCommonUtil
-* Common code library for Unity3d developer
+* Common library for Unity3d developer
 
 ## Developer ##
 * This library is maintain by Robbery and his friends.
