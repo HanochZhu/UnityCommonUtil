@@ -16,3 +16,12 @@
 ## Contains ##
 * singleton
 
+## CSVReader
+
+The toolkit is designed for reading .csv file.To use it, give a file path to csvreader. And use $index$ method to get csv info.
+
+```
+CSVReader reader = new CSVReader(path);
+Debug.Log(reader["A"]["A1"]);
+```
+
