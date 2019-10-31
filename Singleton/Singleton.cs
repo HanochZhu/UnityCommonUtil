@@ -21,8 +21,11 @@ using UnityEngine;
 
 namespace SimpleUIFDemo
 {
-	public class Singleton<T>where T:new(){
+    // legal
+	//public class Singleton<T> : MonoBehaviour where T:new()
 
+	public class Singleton<T> where T : MonoBehaviour, new()
+    {
         private static T _instance;
 
         public static T Instance
@@ -31,7 +34,8 @@ namespace SimpleUIFDemo
             {
                 if (Singleton<T>._instance == null)
                 {
-                    Singleton<T>._instance = new T();
+                    // creat a gameobject with T instance
+                    Singleton<T>._instance = new GameObject(typeof(T).ToString()).AddComponent<T>();
                 }
                 return Singleton<T>._instance;
             }
