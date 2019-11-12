@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 public class CSVReader
 {
@@ -34,10 +35,10 @@ public class CSVReader
 
     // csvContent: read from file
     // convert content to csv object
-    public CSVHandler ReadCSV(string csvContent)
+    public CSVHandler ReadCSV(string path)
     {
         //get content of each line
-        string[] lines = csvContent.Split('\n');
+        string[] lines = File.ReadAllLines(path);
 
         // store length value,
         // function call is luxury
@@ -59,7 +60,7 @@ public class CSVReader
         for (int i = 1; i < length; i++)
         {
             string line = lines[i];
-            string[] chunks = line.Split('\n');
+            string[] chunks = line.Split(',');
             int chunkNum = chunks.Length;
             if (chunkNum > 1)
             {
@@ -68,7 +69,9 @@ public class CSVReader
                 {
                     // first chunk is key
                     CSVItem csvitem = new CSVItem();
-                    csvitem.AddMetaData(head[j], chunks[j]);
+                    // 为啥这里要用j-1呢
+                    // 因为在处理head的时候，已经把第一个空数据处理了，因此这里需要-1
+                    csvitem.AddMetaData(head[j - 1], chunks[j]);
                     hander.Add(key, csvitem);
                 }
             }
