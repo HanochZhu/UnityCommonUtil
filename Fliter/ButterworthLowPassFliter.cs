@@ -11,11 +11,19 @@ public class ButterworthLowPassFliterVector3: ButterworthLowPassFliterBase
 {
     #region private
 
-    Vector3[] last_input_param_ve3 = new Vector3[2] { Vector3.zero, Vector3.zero };
-    Vector3[] last_output_param_ve3 = new Vector3[2] { Vector3.zero, Vector3.zero };
+    Vector3[] last_input_param_ve3 =  { Vector3.zero, Vector3.zero };
+    Vector3[] last_output_param_ve3 =  { Vector3.zero, Vector3.zero };
     Vector3 fliter_output = Vector3.zero;
 
     #endregion
+
+    public void SetInitParams(Vector3 pos)
+    {
+        last_input_param_ve3[0] = pos;
+        last_input_param_ve3[1] = pos;
+        last_output_param_ve3[0] = pos;
+        last_output_param_ve3[1] = pos;
+    }
 
     public Vector3 ButterworthLowpassFliter(Vector3 rawinput, int frequency, int fliterhz)
     {
