@@ -10,32 +10,29 @@
 *           {
 *               get{return Singleton<Test>.Instance;}
 *           }
-*
-*      Date:2017
-*      CLR Version:0.1
-*      create by HHUC on 7/19/2017
 */
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SimpleUIFDemo
+// legal
+//public class Singleton<T> : MonoBehaviour where T:new()
+
+public class Singleton<T> where T : MonoBehaviour, new()
 {
-	public class Singleton<T>where T:new(){
+    private static T _instance;
 
-        private static T _instance;
-
-        public static T Instance
+    public static T Instance
+    {
+        get
         {
-            get
+            if (_instance == null)
             {
-                if (Singleton<T>._instance == null)
-                {
-                    Singleton<T>._instance = new T();
-                }
-                return Singleton<T>._instance;
+                // creat a gameobject with T instance
+                _instance = new GameObject("[IST]" + typeof(T).ToString()).AddComponent<T>();
             }
+            return _instance;
         }
-	}
+    }
 
 }
