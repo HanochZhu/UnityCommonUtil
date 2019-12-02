@@ -1,9 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 public class CSVReader
 {
+    private static CSVReader _instance;
+    public static CSVReader Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new CSVReader();
+            }
+            return _instance;
+        }
+    }
 
     private string filepath;
     private CSVHandler handler;
@@ -13,7 +26,17 @@ public class CSVReader
         get { return handler; }
     }
 
-    //
+    public CSVReader()
+    {
+
+    }
+
+    public void SetPath(string path)
+    {
+        filepath = path;
+    }
+
+    // 
     public CSVReader(string path)
     {
         filepath = path;
@@ -34,10 +57,10 @@ public class CSVReader
 
     // csvContent: read from file
     // convert content to csv object
-    public CSVHandler ReadCSV(string csvContent)
+    public CSVHandler ReadCSV(string path)
     {
         //get content of each line
-        string[] lines = csvContent.Split('\n');
+        string[] lines = File.ReadAllLines(path);
 
         // store length value,
         // function call is luxury
@@ -59,7 +82,7 @@ public class CSVReader
         for (int i = 1; i < length; i++)
         {
             string line = lines[i];
-            string[] chunks = line.Split('\n');
+            string[] chunks = line.Split(',');
             int chunkNum = chunks.Length;
             if (chunkNum > 1)
             {
@@ -68,7 +91,9 @@ public class CSVReader
                 {
                     // first chunk is key
                     CSVItem csvitem = new CSVItem();
-                    csvitem.AddMetaData(head[j], chunks[j]);
+                    // 为啥这里要用j-1呢
+                    // 因为在处理head的时候，已经把第一个空数据处理了，因此这里需要-1
+                    csvitem.AddMetaData(head[j - 1], chunks[j]);
                     hander.Add(key, csvitem);
                 }
             }
@@ -85,11 +110,13 @@ public class CSVHandler
 {
     // row
     public Dictionary<string, CSVItem> dicItems;
+    public List<string> keyList;
 
 
     public CSVHandler()
     {
         dicItems = new Dictionary<string, CSVItem>();
+        keyList = new List<string>();
     }
 
     /// <summary>
@@ -108,6 +135,7 @@ public class CSVHandler
         else
         {
             dicItems.Add(key, value);
+            keyList.Add(key);
         }
     }
 
@@ -144,6 +172,20 @@ public class CSVHandler
             }
             // to avoid null exception error, null printer should avoid.
             // return an empty item object.
+            return CSVItem.NullCSVItem;
+        }
+    }
+
+    public CSVItem this[int index]
+    {
+        get
+        {
+
+            if (keyList.Count < index && index > 0)
+            {
+                string key = keyList[index];
+                return this[key];
+            }
             return CSVItem.NullCSVItem;
         }
     }
@@ -199,11 +241,14 @@ public class CSVItem
     // each column
     public Dictionary<string, CSVMetaData> dicmetaData;
 
+    public List<string> keyList;
+
     public static CSVItem NullCSVItem = new CSVItem();
 
     public CSVItem()
     {
         dicmetaData = new Dictionary<string, CSVMetaData>();
+        keyList = new List<string>();
     }
 
     public CSVMetaData this[string index]
@@ -211,6 +256,27 @@ public class CSVItem
         get
         {
             return dicmetaData[index];
+        }
+    }
+
+    /// <summary>
+    ///  通过整数索引来获取值，从0开始
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public CSVMetaData this[int index]
+    {
+        get
+        {
+            if (keyList.Count > index && index > 0)
+            {
+                string key = keyList[index];
+                if (dicmetaData.ContainsKey(key))
+                {
+                    return dicmetaData[key];
+                }
+            }
+            return CSVMetaData.NULLMetaData;
         }
     }
 
@@ -225,12 +291,15 @@ public class CSVItem
         else
         {
             dicmetaData.Add(key,meta);
+            keyList.Add(key);
         }
     }
 }
 
 public class CSVMetaData
 {
+    public static CSVMetaData NULLMetaData;
+
     private string metadata;
 
     public string MetaData
@@ -250,7 +319,6 @@ public class CSVMetaData
         float outresult = 0.0f;
         if (!float.TryParse(metadata,out outresult))
         {
-            
             return outresult;
         }
         CDebug.CDebugErrorLog(string.Format("{0} can not translate to float", metadata));
