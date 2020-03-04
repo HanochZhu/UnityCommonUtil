@@ -13,7 +13,19 @@ using UnityEngine.Events;
 
 public class EventListener 
 {
-    public static EventListener instance;
+    private static EventListener _instance;
+
+    public static EventListener Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new EventListener();
+            }
+            return _instance;
+        }
+    }
 
     private Dictionary<EventKeys,List< DisptchObject>> eventDictionary;
 
