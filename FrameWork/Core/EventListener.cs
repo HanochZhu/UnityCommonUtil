@@ -89,11 +89,11 @@ public class DisptchObject
 
     public void Invoke(object parameters)
     {
-        target.Invoke(parameters);
+        target?.Invoke(parameters);
     }
 
     public void Invoke()
     {
-        targetNoParameter.Invoke();
+        targetNoParameter?.Invoke();
     }
 }
