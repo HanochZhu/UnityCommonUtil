@@ -13,7 +13,6 @@ using UnityEngine;
 using System.Collections;
 using System;
 using System.IO;
-using App.Network;
 using System.Runtime.InteropServices;
 
 namespace ZFramework
@@ -38,50 +37,50 @@ namespace ZFramework
 #endif
             }
         }
-
+#if UNITY_EDITOR_WIN && UNITY_STANDALONE_WIN
         /// <summary>
         /// 选择文件并返回文件字节流
         /// </summary>
         /// <returns>文件路径</returns>
-        public static byte[] ReadFileFromFolder()
-        {
-            return ReadFileToBytes(OpenImageFormFolder());
-        }
+        //public static byte[] ReadFileFromFolder()
+        //{
+        //    return ReadFileToBytes(OpenImageFormFolder());
+        //}
         /// <summary>
         /// 从文件夹中选择一个文件，并返回对应的文件地址
         /// </summary>
         /// <returns></returns>
-        public static string OpenImageFormFolder()
-        {
-            OpenFileName ofn = new OpenFileName();
+        //public static string OpenImageFormFolder()
+        //{
+        //    OpenFileName ofn = new OpenFileName();
 
-            ofn.m_structSize = Marshal.SizeOf(ofn);
+        //    ofn.m_structSize = Marshal.SizeOf(ofn);
 
-            ofn.m_filter = "All Files\0*.*\0\0";
+        //    ofn.m_filter = "All Files\0*.*\0\0";
 
-            ofn.m_file = new string(new char[256]);
+        //    ofn.m_file = new string(new char[256]);
 
-            ofn.m_maxFile = ofn.m_file.Length;
+        //    ofn.m_maxFile = ofn.m_file.Length;
 
-            ofn.m_fileTitle = new string(new char[64]);
+        //    ofn.m_fileTitle = new string(new char[64]);
 
-            ofn.m_maxFileTitle = ofn.m_fileTitle.Length;
+        //    ofn.m_maxFileTitle = ofn.m_fileTitle.Length;
 
-            ofn.m_initialDir = UnityEngine.Application.dataPath;//默认路径
+        //    ofn.m_initialDir = UnityEngine.Application.dataPath;//默认路径
 
-            ofn.m_title = "Open Project";
+        //    ofn.m_title = "Open Project";
 
-            ofn.m_defExt = "JPG";//显示文件的类型
-                                 //注意 一下项目不一定要全选 但是0x00000008项不要缺少
-            ofn.m_flags = 0x00080000 | 0x00001000 | 0x00000800 | 0x00000200 | 0x00000008;//OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST| OFN_ALLOWMULTISELECT|OFN_NOCHANGEDIR
+        //    ofn.m_defExt = "JPG";//显示文件的类型
+        //                         //注意 一下项目不一定要全选 但是0x00000008项不要缺少
+        //    ofn.m_flags = 0x00080000 | 0x00001000 | 0x00000800 | 0x00000200 | 0x00000008;//OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST| OFN_ALLOWMULTISELECT|OFN_NOCHANGEDIR
 
-            if (WindowDll.GetOpenFileName(ofn))
-            {
-                Debug.Log("Selected file with full path: {0}" + ofn.m_file);
-            }
-            return ofn.m_file;//ReadFileToBytes();
-        }
-
+        //    if (WindowDll.GetOpenFileName(ofn))
+        //    {
+        //        Debug.Log("Selected file with full path: {0}" + ofn.m_file);
+        //    }
+        //    return ofn.m_file;//ReadFileToBytes();
+        //}
+#endif
         /// <summary>
         /// 输入带后缀的文件名称，在默认的根目录下读取文件。
         /// </summary>

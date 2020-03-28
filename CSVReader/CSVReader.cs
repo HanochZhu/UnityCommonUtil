@@ -3,21 +3,77 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 
-public class CSVReader
+// 以文件名为key，文件内容的结构为内容 组成的数据机构
+// 为应对多个csv文件的情况
+public class CSVList
 {
-    private static CSVReader _instance;
-    public static CSVReader Instance
+    private static CSVList _instance;
+    public static CSVList Instance
     {
         get
         {
             if (_instance == null)
             {
-                _instance = new CSVReader();
+                _instance = new CSVList();
             }
+
             return _instance;
         }
     }
 
+    private Dictionary<string, CSVReader> dicReader = new Dictionary<string, CSVReader>();
+
+    public CSVReader ReadCSV(string path)
+    {
+        // 根据文件名来读取，可能会存在的情况是，文件名相同的时候，文件
+        string name = Path.GetFileNameWithoutExtension(path);
+
+        //如果已经存在当前的csv对象
+        if (!dicReader.ContainsKey(name))
+        {
+            dicReader.Add(name, new CSVReader());
+
+            dicReader[name].SetCSVFilePath(path);
+        }
+        return dicReader[name];
+    }
+
+    /// <summary>
+    /// 
+    /// update all file
+    /// </summary>
+    /// <returns></returns>
+    public void UpdateCSVFile()
+    {
+        foreach (var item in dicReader)
+        {
+            item.Value.UpdateCSVReader();
+        }
+    }
+
+    public void UpdateCSVFile(string filePath)
+    {
+        string name = Path.GetFileNameWithoutExtension(filePath);
+
+        dicReader[name]?.UpdateCSVReader();
+    }
+
+    public CSVReader GetCSV(string filePath)
+    {
+        string name = Path.GetFileNameWithoutExtension(filePath);
+
+        if (dicReader.ContainsKey(name))
+        {
+            return dicReader[name];
+        }
+        CDebug.CDebugErrorLog("Can not find the csv file in " + filePath);
+
+        return null;
+    }
+}
+
+public class CSVReader
+{
     private string filepath;
     private CSVHandler handler;
 
@@ -31,15 +87,10 @@ public class CSVReader
 
     }
 
-    public void SetPath(string path)
+    public void SetCSVFilePath(string path)
     {
         filepath = path;
-    }
-
-    // 
-    public CSVReader(string path)
-    {
-        filepath = path;
+        InitCSVReader(path);
     }
 
     public void InitCSVReader(string path)
@@ -49,60 +100,79 @@ public class CSVReader
         handler = ReadCSV();
     }
 
-    // 
-    public CSVHandler ReadCSV()
+    public void UpdateCSVReader()
     {
-        return ReadCSV(filepath);
+        // 每一次update 可能会造成大量的GC
+        // 谨慎操作
+        handler = null;
+
+        handler = ReadCSV();
     }
 
     // csvContent: read from file
     // convert content to csv object
-    public CSVHandler ReadCSV(string path)
+    private CSVHandler ReadCSV()
     {
-        //get content of each line
-        string[] lines = File.ReadAllLines(path);
-
-        // store length value,
-        // function call is luxury
-        int length = lines.Length;
-
-        // check if csv file is empty
-        if (length <= 1)
+        try
         {
-            CDebug.CDebugErrorLog(string.Format("csv file is empty :{0}", filepath));
-            return null;
-        }
-
-        // remove the space in the first line
-        string[] head = CSVHandler.GetHead(lines[0]);// '0'(magic number) point at first row of csv file 
-
-        // csv object init
-        CSVHandler hander = new CSVHandler();
-
-        for (int i = 1; i < length; i++)
-        {
-            string line = lines[i];
-            string[] chunks = line.Split(',');
-            int chunkNum = chunks.Length;
-            if (chunkNum > 1)
+            if (string.IsNullOrEmpty(filepath))
             {
-                string key = chunks[0];
-                for (int j = 1; j < chunkNum; j++)
+                return null;
+            }
+            //get content of each line
+            string[] lines = File.ReadAllLines(filepath);
+
+            // store length value,
+            // function call is luxury
+            int length = lines.Length;
+
+            // check if csv file is empty
+            if (length <= 1)
+            {
+                CDebug.CDebugErrorLog(string.Format("csv file is empty :{0}", filepath));
+                return null;
+            }
+
+            // remove the space in the first line
+            string[] head = CSVHandler.GetHead(lines[0]);// '0'(magic number) point at first row of csv file 
+
+            // csv object init
+            CSVHandler hander = new CSVHandler();
+
+            for (int i = 1; i < length; i++)
+            {
+                string line = lines[i];
+                string[] chunks = line.Split(',');
+                int chunkNum = chunks.Length;
+                if (chunkNum > 1)
                 {
-                    // first chunk is key
-                    CSVItem csvitem = new CSVItem();
-                    // 为啥这里要用j-1呢
-                    // 因为在处理head的时候，已经把第一个空数据处理了，因此这里需要-1
-                    csvitem.AddMetaData(head[j - 1], chunks[j]);
-                    hander.Add(key, csvitem);
+                    string key = chunks[0];
+                    for (int j = 1; j < chunkNum; j++)
+                    {
+                        // first chunk is key
+                        CSVItem csvitem = new CSVItem();
+                        // 为啥这里要用j-1呢
+                        // 因为在处理head的时候，已经把第一个空数据处理了，因此这里需要-1
+                        csvitem.AddMetaData(head[j - 1], chunks[j]);
+                        hander.Add(key, csvitem);
+                    }
+                }
+                else
+                {
+                    CDebug.CDebugErrorLog("CSV file is empty!");
                 }
             }
-            else
-            {
-                CDebug.CDebugErrorLog("CSV file is empty!");
-            }
+            return hander;
         }
-        return hander;
+        catch(Exception e)
+        {
+            CDebug.CDebugErrorLog(e);
+            return null;
+        }
+        finally
+        {
+            CDebug.CDebugErrorLog("test finally");
+        }
     }
 }
 
@@ -216,7 +286,7 @@ public class CSVHandler
         int headitemNum = headitems.Length;
         if (headitemNum <= 1)
         {
-            CDebug.CDebugErrorLog("string format of headline is't correct");
+            CDebug.CDebugErrorLog("String format of headline is't correct");
             return null;
         }
         // delete first item in items;
@@ -232,6 +302,12 @@ public class CSVHandler
             CDebug.CDebugErrorLog(ex.ToString());
         }
         return headitemExpelFirst;
+    }
+
+    public void Dispose()
+    {
+        dicItems = null;
+        keyList = null;
     }
 }
 
