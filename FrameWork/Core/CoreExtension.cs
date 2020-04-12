@@ -18,6 +18,7 @@ public static class CoreExtension
 
     public static void Register(this IEventProxy self, EventKeys key,UnityAction<object> obj)
     {
+
         DisptchObject disptchObject = new DisptchObject();
         disptchObject.Init(obj);
         EventListener.Instance.RegistEvent(key, disptchObject);

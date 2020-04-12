@@ -6,5 +6,25 @@ public enum EventKeys
 {
     StartSensorsDetect,
     GetSensorDetectResult,
-    Global
+    ControlPanelMove,
+
+    // detector(sensor)
+    SetRandomErrorRange,
+    BroadcastPosition,
+    DetectComplete,
+
+
+    // UI
+    AskForRepeatPosition,
+    ChangeDetectedObjectRotX,
+    ChangeDetectedObjectRotY,
+    ChangeSlidDistance,
+
+    Global,
+}
+
+public enum FreeEventKey
+{
+    RecordPLCSignal,
+    Other
 }
